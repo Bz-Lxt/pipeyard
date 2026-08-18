@@ -19,7 +19,7 @@ func (y *Yard) Schedule(ctx context.Context, n int) ([]schedule.Candidate, error
 	}
 	var cands []schedule.Candidate
 	for _, job := range jobs {
-		if job.Status.Terminal() {
+		if types.JobStatus(job.Status).Terminal() {
 			continue
 		}
 		ready, err := y.ReadyNodes(ctx, job.ID)
