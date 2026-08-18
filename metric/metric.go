@@ -24,6 +24,7 @@ func (c *Counters) AddSubmitted(n int64)  { c.add(func(s *Snapshot) { s.Submitte
 func (c *Counters) AddTicked(n int64)     { c.add(func(s *Snapshot) { s.Ticked += n }) }
 func (c *Counters) AddCompleted(n int64)  { c.add(func(s *Snapshot) { s.Completed += n }) }
 func (c *Counters) AddFailed(n int64)     { c.add(func(s *Snapshot) { s.Failed += n }) }
+func (c *Counters) AddCanceled(n int64)   { c.add(func(s *Snapshot) { s.Canceled += n }) }
 func (c *Counters) AddCheckpoint(n int64) { c.add(func(s *Snapshot) { s.Checkpoints += n }) }
 func (c *Counters) AddLease(n int64)      { c.add(func(s *Snapshot) { s.Leases += n }) }
 

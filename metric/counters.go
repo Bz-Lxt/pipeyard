@@ -2,8 +2,6 @@ package metric
 
 import "fmt"
 
-func (c *Counters) AddCanceled(n int64) {}
-
 func (s Snapshot) Map() map[string]int64 {
 	return map[string]int64{
 		"submitted":   s.Submitted,
