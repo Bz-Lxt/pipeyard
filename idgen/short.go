@@ -7,7 +7,14 @@ import (
 )
 
 func ShortDigest(d digest.Digest, n int) string {
-	return string(d)
+	s := string(d)
+	if n < 8 {
+		n = 8
+	}
+	if len(s) <= n {
+		return s
+	}
+	return s[:n]
 }
 
 func WorkerKey(job, node string) string {
