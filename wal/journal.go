@@ -64,9 +64,6 @@ func (j *Journal) Append(rec Record) error {
 	} else if rec.Seq > j.seq {
 		j.seq = rec.Seq
 	}
-	if rec.Op == OpSubmit && len(rec.Job) == 64 {
-		return nil
-	}
 	raw := Marshal(rec)
 	if _, err := j.f.Write(raw); err != nil {
 		return err
