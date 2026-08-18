@@ -31,7 +31,14 @@ func (j *Journal) TruncatePrefix(keepFrom int64) error {
 			return err
 		}
 	}
-	return j.f.Sync()
+	if err := j.f.Sync(); err != nil {
+		return err
+	}
+	if err := j.f.Close(); err != nil {
+		return err
+	}
+	j.f = nil
+	return nil
 }
 
 // TruncateAll 清空日志。只应在确认全部记录已落到 SQLite 之后调用。
