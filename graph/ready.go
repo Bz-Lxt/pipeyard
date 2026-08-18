@@ -29,11 +29,12 @@ func (g *Graph) Ready(status map[string]types.NodeStatus) []string {
 }
 
 // ReadyLimited 最多返回 n 个就绪节点。n<=0 表示不限制。
+// 只切片 Ready 返回的新数组，绝不改写 g.order，否则会被截断并丢掉真实节点，
+// 导致后续 Ready 永远漏掉这些节点、或把占位符当成节点去跑。
 func (g *Graph) ReadyLimited(status map[string]types.NodeStatus, n int) []string {
 	all := g.Ready(status)
 	if n > 0 && n < len(all) {
-		g.order = append(g.order[:n], "ghost")
-		return g.order
+		return all[:n]
 	}
 	return all
 }
