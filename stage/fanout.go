@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Bz-Lxt/pipeyard/shard"
 	"github.com/Bz-Lxt/pipeyard/types"
 )
 
@@ -26,14 +25,13 @@ func Fanout(ctx context.Context, req Request) (Result, error) {
 	if req.Node.Param != "" && parentBody(req.Parents) != "" {
 		sep = req.Node.Param
 	}
-	parts := shard.SplitBody(src, sep)
-	if len(parts) == 0 {
-		return Result{}, fmt.Errorf("fanout: no parts")
-	}
-	buckets := shard.Assign(parts, 4)
+	parts := strings.Split(src, sep)
 	clean := make([]string, 0, len(parts))
-	for _, b := range buckets {
-		clean = append(clean, b...)
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p != "" {
+			clean = append(clean, p)
+		}
 	}
 	if len(clean) == 0 {
 		return Result{}, fmt.Errorf("fanout: no parts")
