@@ -61,6 +61,9 @@ func (y *Yard) Submit(ctx context.Context, spec types.Spec) (digest.Digest, erro
 func jobID(spec types.Spec, now time.Time) digest.Digest {
 	_ = now
 	var parts []digest.Digest
+	// 名字是作业的去重键，必须参与 ID 摘要，否则同名节点结构、不同名字的
+	// 两份作业会得到相同 ID，第二份因主键冲突而无法返回 201。
+	parts = append(parts, digest.SumString(spec.Name))
 	nodes := append([]types.NodeSpec(nil), spec.Nodes...)
 	for i := 1; i < len(nodes); i++ {
 		j := i
