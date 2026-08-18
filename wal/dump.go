@@ -6,12 +6,22 @@ import (
 )
 
 func Dump(recs []Record) string {
+	text, err := formatDump(recs)
+	if err != nil {
+		return ""
+	}
+	return text
+}
+
+func formatDump(recs []Record) (string, error) {
 	var b bytes.Buffer
 	for i, r := range recs {
-		fmt.Fprintf(&b, "%d seq=%d op=%s job=%s node=%s payload=%d crc=%d\n",
-			i, r.Seq, OpName(r.Op), r.Job, r.Node, len(r.Payload), r.CRC)
+		if _, err := fmt.Fprintf(&b, "%d seq=%d op=%s job=%s node=%s payload=%d crc=%d\n",
+			i, r.Seq, OpName(r.Op), r.Job, r.Node, len(r.Payload), r.CRC); err != nil {
+			return "", err
+		}
 	}
-	return b.String()
+	return b.String(), nil
 }
 
 func FilterJob(recs []Record, job string) []Record {
