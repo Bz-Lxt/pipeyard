@@ -29,7 +29,7 @@ func RecomputeStatuses(ctx context.Context, db *store.DB) (int, error) {
 func CountOpen(jobs []types.Job) int {
 	n := 0
 	for _, j := range jobs {
-		if !j.Status.Terminal() || j.Status == types.JobCanceled {
+		if !j.Status.Terminal() {
 			n++
 		}
 	}
