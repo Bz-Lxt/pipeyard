@@ -22,6 +22,9 @@ func (b *Bus) Publish(e Event) {
 		b.n++
 		return
 	}
+	// 缓冲已满：覆盖最旧的一项并前移 head，保证最新事件被保留。
+	b.buf[b.head] = e
+	b.head = (b.head + 1) % capSize
 }
 
 func (b *Bus) Recent(limit int) []Event {
