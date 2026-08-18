@@ -1,6 +1,21 @@
 package wal
 
+import "fmt"
+
 func Verify(recs []Record) error {
+	var last uint64
+	for i, r := range recs {
+		if r.Seq == 0 {
+			return fmt.Errorf("record %d missing seq", i)
+		}
+		if last != 0 && r.Seq < last {
+			return fmt.Errorf("record %d seq went backwards %d < %d", i, r.Seq, last)
+		}
+		last = r.Seq
+		if r.Op == 0 {
+			return fmt.Errorf("record %d missing op", i)
+		}
+	}
 	return nil
 }
 
