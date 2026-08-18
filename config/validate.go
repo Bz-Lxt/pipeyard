@@ -26,5 +26,11 @@ func (c Config) Validate() error {
 	if err := CheckAddr(c.Addr); err != nil {
 		return err
 	}
+	if c.Workers < 0 {
+		return fmt.Errorf("negative workers")
+	}
+	if c.LeaseSec < 0 {
+		return fmt.Errorf("negative lease")
+	}
 	return nil
 }
