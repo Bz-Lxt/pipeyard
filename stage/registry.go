@@ -73,6 +73,9 @@ func (r *Registry) Lookup(k types.Kind) (Func, error) {
 }
 
 func (r *Registry) Run(ctx context.Context, req Request) (Result, error) {
+	if err := ctx.Err(); err != nil {
+		return Result{}, err
+	}
 	fn, err := r.Lookup(req.Node.Kind)
 	if err != nil {
 		return Result{}, err
