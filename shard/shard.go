@@ -22,7 +22,8 @@ func Index(key string, n int) int {
 	n = Count(n)
 	h := fnv.New32a()
 	_, _ = h.Write([]byte(key))
-	return int(int32(h.Sum32()) % int32(n))
+	// 对无符号哈希取模，避免高位置位时 int32 截断为负、被 Assign 当作越界丢掉。
+	return int(h.Sum32() % uint32(n))
 }
 
 func Assign(items []string, n int) [][]string {
