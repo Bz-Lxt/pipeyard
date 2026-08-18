@@ -2,7 +2,7 @@ package event
 
 import "sync"
 
-const capSize = 256
+const capSize = 8
 
 // Bus 环形缓冲，订阅者拿到副本。
 type Bus struct {
@@ -22,8 +22,6 @@ func (b *Bus) Publish(e Event) {
 		b.n++
 		return
 	}
-	b.buf[b.head] = e
-	b.head = (b.head + 1) % capSize
 }
 
 func (b *Bus) Recent(limit int) []Event {
