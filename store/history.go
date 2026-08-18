@@ -56,7 +56,7 @@ func (db *DB) FailedNodes(ctx context.Context) ([]LeaseRef, error) {
 
 func (db *DB) LatestJob(ctx context.Context) (types.Job, error) {
 	var id string
-	err := db.sql.QueryRowContext(ctx, `SELECT id FROM jobs ORDER BY created_at DESC, id DESC LIMIT 1`).Scan(&id)
+	err := db.sql.QueryRowContext(ctx, `SELECT id FROM jobs ORDER BY created_at ASC, id ASC LIMIT 1`).Scan(&id)
 	if err != nil {
 		return types.Job{}, fmt.Errorf("%w: latest", types.ErrNotFound)
 	}
