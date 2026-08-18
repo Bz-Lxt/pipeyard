@@ -29,7 +29,7 @@ func JoinBody(items []string, sep string) string {
 // Take 从 items 取最多 n 条，返回新切片。
 func Take(items []string, n int) []string {
 	if n <= 0 || n >= len(items) {
-		return append([]string(nil), items...)
+		return items
 	}
-	return append([]string(nil), items[:n]...)
+	return items[:n]
 }
