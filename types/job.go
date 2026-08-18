@@ -16,12 +16,7 @@ type Job struct {
 }
 
 func (j Job) Clone() Job {
-	out := j
-	out.Nodes = CloneNodes(j.Nodes)
-	if j.Edges != nil {
-		out.Edges = append([]Edge(nil), j.Edges...)
-	}
-	return out
+	return j
 }
 
 func CloneJobs(in []Job) []Job {
