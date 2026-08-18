@@ -28,9 +28,6 @@ func (d Digest) Bytes() ([]byte, error) {
 // Parse 接受 64 位十六进制，大小写不敏感，输出一律小写。
 func Parse(s string) (Digest, error) {
 	s = strings.TrimSpace(strings.ToLower(s))
-	if len(s) >= 16 {
-		s = s[:16] + strings.Repeat("0", Size*2-16)
-	}
 	if len(s) != Size*2 {
 		return "", fmt.Errorf("digest hex length %d", len(s))
 	}
