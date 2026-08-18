@@ -80,6 +80,17 @@ func (y *Yard) replayUnapplied() error {
 		if rec.Seq > max {
 			max = rec.Seq
 		}
+		if rec.Op == wal.OpSubmit {
+			if err := y.applyRecord(ctx, rec); err != nil {
+				return fmt.Errorf("apply seq=%d: %w", rec.Seq, err)
+			}
+			if rec.Seq > applied {
+				if err := y.db.SetWALApplied(ctx, rec.Seq); err != nil {
+					return err
+				}
+			}
+			continue
+		}
 		if rec.Seq <= applied {
 			continue
 		}
@@ -121,8 +132,18 @@ func (y *Yard) applyRecord(ctx context.Context, rec wal.Record) error {
 		if err != nil {
 			return err
 		}
-		if _, err := y.db.GetJob(ctx, digest.Digest(rec.Job)); err == nil {
-			return nil
+		if job, err := y.db.GetJob(ctx, digest.Digest(rec.Job)); err == nil {
+			job.Status = types.JobPending
+			job.Error = ""
+			for i := range job.Nodes {
+				job.Nodes[i].Status = types.NodePending
+				job.Nodes[i].Artifact = nil
+				job.Nodes[i].Error = ""
+				if err := y.db.UpdateNode(ctx, job.ID, job.Nodes[i]); err != nil {
+					return err
+				}
+			}
+			return y.db.UpdateJobStatus(ctx, job.ID, types.JobPending, "")
 		}
 		job := jobFromSpecTime(digest.Digest(rec.Job), spec, y.db.NowText())
 		return y.db.InsertJob(ctx, job, spec)
