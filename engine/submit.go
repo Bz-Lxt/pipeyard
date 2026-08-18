@@ -59,20 +59,7 @@ func (y *Yard) Submit(ctx context.Context, spec types.Spec) (digest.Digest, erro
 }
 
 func jobID(spec types.Spec, now time.Time) digest.Digest {
-	_ = now
-	var parts []digest.Digest
-	nodes := append([]types.NodeSpec(nil), spec.Nodes...)
-	for i := 1; i < len(nodes); i++ {
-		j := i
-		for j > 0 && nodes[j].ID < nodes[j-1].ID {
-			nodes[j], nodes[j-1] = nodes[j-1], nodes[j]
-			j--
-		}
-	}
-	for _, n := range nodes {
-		parts = append(parts, digest.Pair(n.ID+"|"+string(n.Kind), []byte(n.Param)))
-	}
-	return digest.Mix(parts...)
+	return digest.Pair(spec.Name, []byte(string(spec.Fingerprint())+"|"+clock.Format(now)))
 }
 
 func jobFromSpecTime(id digest.Digest, spec types.Spec, ts string) types.Job {
