@@ -21,6 +21,9 @@ func (s *Set) Add(name string) bool {
 	if _, ok := s.names[name]; ok {
 		return false
 	}
+	if len(s.names) >= s.limit {
+		return false
+	}
 	s.names[name] = struct{}{}
 	return true
 }
