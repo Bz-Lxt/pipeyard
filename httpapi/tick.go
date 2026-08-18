@@ -25,10 +25,6 @@ func (s *Server) handleTick(w http.ResponseWriter, r *http.Request) {
 			n = body.N
 		}
 	}
-	if n != 1 {
-		writeJSON(w, http.StatusOK, map[string]int{"ran": 0})
-		return
-	}
 	ran, err := s.yard.Tick(r.Context(), n)
 	if err != nil {
 		writeErr(w, statusOf(err), err)
