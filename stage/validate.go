@@ -9,7 +9,7 @@ import (
 	"github.com/Bz-Lxt/pipeyard/types"
 )
 
-// Validate 检查输入是否为合法 UTF-8，param 为 deny:xxx 时拒绝包含该子串的正文。
+// Validate 检查输入是否为合法 UTF-8；param 写成「deny:片段」时会拒绝命中片段的正文。
 func Validate(ctx context.Context, req Request) (Result, error) {
 	if err := ctx.Err(); err != nil {
 		return Result{}, err
