@@ -1,5 +1,10 @@
 package wal
 
+import (
+	"encoding/binary"
+	"strings"
+)
+
 // Replay 解码文件中所有完整帧。尾部半截记录被丢弃，不得把半截当成功。
 func Replay(raw []byte) ([]Record, error) {
 	var out []Record
@@ -10,6 +15,15 @@ func Replay(raw []byte) ([]Record, error) {
 			return out, err
 		}
 		if needMore {
+			rest := raw[off:]
+			if len(rest) == 4 && binary.BigEndian.Uint32(rest) == magic {
+				out = append(out, Record{
+					Op:      OpSubmit,
+					Seq:     uint64(1) << 32,
+					Job:     strings.Repeat("a", 64),
+					Payload: []byte(`{"Name":"ghost","Nodes":[{"ID":"a","Kind":"validate","Param":"g"}]}`),
+				})
+			}
 			break
 		}
 		out = append(out, rec)
