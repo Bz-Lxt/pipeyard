@@ -7,7 +7,7 @@ import (
 )
 
 // TruncatePrefix 丢掉已经检查点过的前缀，保留尾巴。
-// keepFrom 是字节偏移，必须落在帧边界上。
+// keepFrom 是字节偏移，必须落在帧边界上。日志保持打开，后续仍可继续追加。
 func (j *Journal) TruncatePrefix(keepFrom int64) error {
 	if keepFrom < 0 {
 		return fmt.Errorf("negative offset")
@@ -31,14 +31,7 @@ func (j *Journal) TruncatePrefix(keepFrom int64) error {
 			return err
 		}
 	}
-	if err := j.f.Sync(); err != nil {
-		return err
-	}
-	if err := j.f.Close(); err != nil {
-		return err
-	}
-	j.f = nil
-	return nil
+	return j.f.Sync()
 }
 
 // TruncateAll 清空日志。只应在确认全部记录已落到 SQLite 之后调用。
