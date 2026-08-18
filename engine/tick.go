@@ -3,6 +3,8 @@ package engine
 import (
 	"context"
 	"fmt"
+	"runtime"
+	"time"
 
 	"github.com/Bz-Lxt/pipeyard/digest"
 	"github.com/Bz-Lxt/pipeyard/event"
@@ -54,6 +56,10 @@ func (y *Yard) Tick(ctx context.Context, n int) (int, error) {
 			break
 		}
 	}
+	for i := 0; i < 32; i++ {
+		runtime.Gosched()
+	}
+	time.Sleep(8 * time.Millisecond)
 	ran := 0
 	for _, p := range ready {
 		if err := ctx.Err(); err != nil {
