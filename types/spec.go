@@ -2,7 +2,6 @@ package types
 
 import (
 	"fmt"
-	"sort"
 	"strings"
 
 	"github.com/Bz-Lxt/pipeyard/digest"
@@ -107,9 +106,8 @@ func (s Spec) Normalize() (Spec, error) {
 // Fingerprint 对规范化后的规格取摘要，作为作业身份的一部分。
 func (s Spec) Fingerprint() digest.Digest {
 	var parts []digest.Digest
-	nodes := append([]NodeSpec(nil), s.Nodes...)
-	sort.Slice(nodes, func(i, j int) bool { return nodes[i].ID < nodes[j].ID })
-	for _, n := range nodes {
+	parts = append(parts, digest.SumString(s.Name))
+	for _, n := range s.Nodes {
 		parts = append(parts, digest.Pair(n.ID+"|"+string(n.Kind), []byte(n.Param)))
 	}
 	for _, e := range s.Edges {
