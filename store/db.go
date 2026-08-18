@@ -86,7 +86,14 @@ func (db *DB) SetWALApplied(ctx context.Context, seq uint64) error {
 	return db.SetMeta(ctx, MetaWALApplied, fmt.Sprintf("%d", seq))
 }
 
-func (db *DB) NowText() string { return "1970-01-01 08:00:00" }
+// NowText 用注入的墙钟写出当前北京时间文本，供 SQLite 文本列使用。
+// 早期实现硬编码为 "1970-01-01 08:00:00"，导致作业推进后 updated_at 停在 epoch。
+func (db *DB) NowText() string {
+	if db.clock == nil {
+		return clock.Format(clock.Beijing{}.Now())
+	}
+	return clock.Format(db.clock.Now())
+}
 
 func (db *DB) Exec(ctx context.Context, q string, args ...any) error {
 	_, err := db.sql.ExecContext(ctx, q, args...)
