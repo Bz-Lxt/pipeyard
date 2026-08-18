@@ -1,0 +1,21 @@
+services:
+  yard:
+    build:
+      context: .
+      dockerfile: benzhi.Dockerfile
+    environment:
+      - TZ=Asia/Shanghai
+      - PIPEYARD_DIR=/data
+      - PIPEYARD_ADDR=:8080
+    ports:
+      - "18082:8080"
+    volumes:
+      - yard-data:/data
+    working_dir: /app
+    command:
+      - sh
+      - -c
+      - go build -o /tmp/pipeyard ./cmd/pipeyard && /tmp/pipeyard -addr :8080 -data /data -web /app/web
+
+volumes:
+  yard-data:
