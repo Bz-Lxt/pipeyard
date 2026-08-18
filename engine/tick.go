@@ -12,23 +12,21 @@ import (
 	"github.com/Bz-Lxt/pipeyard/worker"
 )
 
-// Tick 领取至多 n 个就绪节点并执行。选好节点后放开互斥锁再跑阶段，缩短持锁时间。
+// Tick 领取至多 n 个就绪节点并执行。领取与完成共用同一把锁，避免双 worker 写同一节点。
 func (y *Yard) Tick(ctx context.Context, n int) (int, error) {
 	y.mu.Lock()
+	defer y.mu.Unlock()
 	if err := y.guard(ctx); err != nil {
-		y.mu.Unlock()
 		return 0, err
 	}
 	if n <= 0 {
 		n = 1
 	}
 	if _, err := y.db.ReleaseExpired(ctx, y.db.NowText()); err != nil {
-		y.mu.Unlock()
 		return 0, err
 	}
 	jobs, err := y.db.ListJobs(ctx)
 	if err != nil {
-		y.mu.Unlock()
 		return 0, err
 	}
 	type pick struct {
@@ -58,7 +56,6 @@ func (y *Yard) Tick(ctx context.Context, n int) (int, error) {
 			break
 		}
 	}
-	y.mu.Unlock()
 	ran := 0
 	for _, p := range ready {
 		if err := ctx.Err(); err != nil {
