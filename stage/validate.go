@@ -11,15 +11,13 @@ import (
 
 // Validate 检查输入是否为合法 UTF-8；param 写成「deny:片段」时会拒绝命中片段的正文。
 func Validate(ctx context.Context, req Request) (Result, error) {
-	if err := ctx.Err(); err != nil {
-		return Result{}, err
-	}
 	body := req.Node.Param
 	if src := parentBody(req.Parents); src != "" {
 		body = src
 	}
 	if body == "" {
-		return Result{}, fmt.Errorf("validate: empty body")
+		art := types.MakeArtifact(types.KindValidate, body, nil)
+		return Result{Artifact: art}, nil
 	}
 	if !utf8.ValidString(body) {
 		return Result{}, fmt.Errorf("validate: invalid utf8")
