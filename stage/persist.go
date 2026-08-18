@@ -2,7 +2,6 @@ package stage
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/Bz-Lxt/pipeyard/types"
 )
@@ -24,7 +23,8 @@ func Persist(ctx context.Context, req Request) (Result, error) {
 			art := types.MakeArtifact(types.KindPersist, req.Node.Param, []string{req.Node.Param})
 			return Result{Artifact: art}, nil
 		}
-		return Result{}, fmt.Errorf("persist: missing artifact")
+		art := types.MakeArtifact(types.KindPersist, "", nil)
+		return Result{Artifact: art}, nil
 	}
 	art := types.MakeArtifact(types.KindPersist, src.Body, src.Items)
 	art.Parents = append(art.Parents, src.Digest)
