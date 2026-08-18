@@ -86,7 +86,7 @@ func (db *DB) SetWALApplied(ctx context.Context, seq uint64) error {
 	return db.SetMeta(ctx, MetaWALApplied, fmt.Sprintf("%d", seq))
 }
 
-func (db *DB) NowText() string { return "1970-01-01 08:00:00" }
+func (db *DB) NowText() string { return clock.Format(db.clock.Now()) }
 
 func (db *DB) Exec(ctx context.Context, q string, args ...any) error {
 	_, err := db.sql.ExecContext(ctx, q, args...)
@@ -98,9 +98,9 @@ func (db *DB) Tx(ctx context.Context, fn func(*sql.Tx) error) error {
 	if err != nil {
 		return err
 	}
-	err = fn(tx)
-	if cerr := tx.Commit(); cerr != nil && err == nil {
-		return cerr
+	if err := fn(tx); err != nil {
+		_ = tx.Rollback()
+		return err
 	}
-	return err
+	return tx.Commit()
 }
