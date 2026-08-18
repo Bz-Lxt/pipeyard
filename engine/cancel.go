@@ -35,6 +35,7 @@ func (y *Yard) Cancel(ctx context.Context, id digest.Digest) error {
 	if err := y.db.SetWALApplied(ctx, y.journal.Seq()); err != nil {
 		return err
 	}
+	y.metrics.AddCanceled(1)
 	y.bus.Publish(event.Event{Kind: event.KindCancel, Job: string(id), At: y.cfg.Clock.Now()})
 	return nil
 }

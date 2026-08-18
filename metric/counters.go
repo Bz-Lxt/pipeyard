@@ -2,7 +2,7 @@ package metric
 
 import "fmt"
 
-func (c *Counters) AddCanceled(n int64) {}
+func (c *Counters) AddCanceled(n int64) { c.add(func(s *Snapshot) { s.Canceled += n }) }
 
 func (s Snapshot) Map() map[string]int64 {
 	return map[string]int64{
