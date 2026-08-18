@@ -60,10 +60,9 @@ if [[ "$c1" != "201" || "$c2" != "201" ]]; then
   exit 2
 fi
 
-echo "[EXPECT] third submit is 409 when max jobs is 2"
-echo "[ACTUAL] ${c1} ${c2} ${c3}"
-
-if [[ "$c3" == "201" ]]; then
+if [[ "$c3" != "409" ]]; then
+  echo "[EXPECT] third submit is 409 when max jobs is 2"
+  echo "[ACTUAL] ${c1} ${c2} ${c3}"
   exit 1
 fi
 exit 0
