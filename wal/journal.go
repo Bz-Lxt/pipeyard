@@ -7,12 +7,16 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sync"
 )
 
 var ErrCorrupt = errors.New("wal corrupt")
 
 // Journal 追加写 WAL。
+// Append 可被多个调度循环并发调用（并发 Tick 同时落日志），因此序号推进、
+// 文件写入与读取都串行化：序号不会重复，帧不会交错写坏，检查点也不会读到半截数据。
 type Journal struct {
+	mu   sync.Mutex
 	path string
 	f    *os.File
 	seq  uint64
@@ -47,20 +51,33 @@ func (j *Journal) Close() error {
 }
 
 func (j *Journal) NextSeq() uint64 {
+	j.mu.Lock()
+	defer j.mu.Unlock()
 	j.seq++
 	return j.seq
 }
 
-func (j *Journal) SetSeq(n uint64) { j.seq = n }
+func (j *Journal) SetSeq(n uint64) {
+	j.mu.Lock()
+	defer j.mu.Unlock()
+	j.seq = n
+}
 
-func (j *Journal) Seq() uint64 { return j.seq }
+func (j *Journal) Seq() uint64 {
+	j.mu.Lock()
+	defer j.mu.Unlock()
+	return j.seq
+}
 
 func (j *Journal) Append(rec Record) error {
 	if j == nil || j.f == nil {
 		return fmt.Errorf("journal closed")
 	}
+	j.mu.Lock()
+	defer j.mu.Unlock()
 	if rec.Seq == 0 {
-		rec.Seq = j.NextSeq()
+		j.seq++
+		rec.Seq = j.seq
 	} else if rec.Seq > j.seq {
 		j.seq = rec.Seq
 	}
@@ -75,6 +92,8 @@ func (j *Journal) Append(rec Record) error {
 }
 
 func (j *Journal) Size() (int64, error) {
+	j.mu.Lock()
+	defer j.mu.Unlock()
 	st, err := j.f.Stat()
 	if err != nil {
 		return 0, err
@@ -82,7 +101,8 @@ func (j *Journal) Size() (int64, error) {
 	return st.Size(), err
 }
 
-func (j *Journal) ReadAll() ([]byte, error) {
+// readAllLocked 读取整个日志，调用方须持锁。
+func (j *Journal) readAllLocked() ([]byte, error) {
 	if _, err := j.f.Seek(0, io.SeekStart); err != nil {
 		return nil, err
 	}
@@ -94,4 +114,10 @@ func (j *Journal) ReadAll() ([]byte, error) {
 		return nil, err
 	}
 	return raw, nil
+}
+
+func (j *Journal) ReadAll() ([]byte, error) {
+	j.mu.Lock()
+	defer j.mu.Unlock()
+	return j.readAllLocked()
 }

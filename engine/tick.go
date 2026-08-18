@@ -2,6 +2,7 @@ package engine
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"runtime"
 	"time"
@@ -15,6 +16,8 @@ import (
 )
 
 // Tick 领取至多 n 个就绪节点并执行。选节点与跑阶段都不占互斥锁，避免 Tick 堵住 Get/List。
+// 节点级互斥由 ClaimLease 在单连接 SQLite 事务里保证，因此多个调度循环可并发调用：
+// 同一节点只会被一个 Tick 真正执行，其余 Tick 在 ClaimLease 处落空并跳过，调用照常返回 200。
 func (y *Yard) Tick(ctx context.Context, n int) (int, error) {
 	if err := y.guard(ctx); err != nil {
 		return 0, err
@@ -68,13 +71,23 @@ func (y *Yard) Tick(ctx context.Context, n int) (int, error) {
 			}
 			return ran, err
 		}
-		if err := y.runOneLocked(ctx, p.job, p.node); err != nil {
+		err := y.runOneLocked(ctx, p.job, p.node)
+		switch {
+		case err == nil:
+			ran++
+		case errors.Is(err, types.ErrLeaseHeld), errors.Is(err, types.ErrDone):
+			// 该节点已被并发调度循环领取或完成，跳过即可，不算失败。
+			continue
+		case errors.Is(err, types.ErrQuota):
+			// 租约配额已满，说明在跑的并发阶段已达上限；本次不再领取，正常返回。
+			y.metrics.AddTicked(int64(ran))
+			return ran, nil
+		default:
 			if ctx.Err() != nil {
 				return ran, ctx.Err()
 			}
 			return ran, err
 		}
-		ran++
 	}
 	y.metrics.AddTicked(int64(ran))
 	return ran, nil
@@ -174,10 +187,5 @@ func (y *Yard) parentArtifacts(job types.Job, nodeID string) []*types.Artifact {
 }
 
 func (y *Yard) refreshJob(ctx context.Context, id digest.Digest) error {
-	job, err := y.db.GetJob(ctx, id)
-	if err != nil {
-		return err
-	}
-	job.RefreshStatus()
-	return y.db.UpdateJobStatus(ctx, id, job.Status, job.Error)
+	return y.db.RefreshJobStatus(ctx, id)
 }

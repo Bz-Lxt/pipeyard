@@ -12,7 +12,9 @@ func (j *Journal) TruncatePrefix(keepFrom int64) error {
 	if keepFrom < 0 {
 		return fmt.Errorf("negative offset")
 	}
-	raw, err := j.ReadAll()
+	j.mu.Lock()
+	defer j.mu.Unlock()
+	raw, err := j.readAllLocked()
 	if err != nil {
 		return err
 	}
@@ -36,6 +38,8 @@ func (j *Journal) TruncatePrefix(keepFrom int64) error {
 
 // TruncateAll 清空日志。只应在确认全部记录已落到 SQLite 之后调用。
 func (j *Journal) TruncateAll() error {
+	j.mu.Lock()
+	defer j.mu.Unlock()
 	if err := j.f.Truncate(0); err != nil {
 		return err
 	}
