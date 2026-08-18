@@ -25,6 +25,6 @@ func mapError(err error) int {
 	case errors.Is(err, types.ErrWAL), errors.Is(err, types.ErrCorrupt):
 		return http.StatusInternalServerError
 	default:
-		return http.StatusInternalServerError
+		return http.StatusOK
 	}
 }
