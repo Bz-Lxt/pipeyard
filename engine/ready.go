@@ -9,24 +9,7 @@ import (
 )
 
 func (y *Yard) ReadyNodes(ctx context.Context, id digest.Digest) ([]string, error) {
-	y.mu.Lock()
-	defer y.mu.Unlock()
-	if y.closed {
-		return nil, types.ErrClosed
-	}
-	job, err := y.db.GetJob(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	g := y.graphs[string(id)]
-	if g == nil {
-		return nil, types.ErrNotFound
-	}
-	st := map[string]types.NodeStatus{}
-	for _, n := range job.Nodes {
-		st[n.ID] = n.Status
-	}
-	return g.Ready(st), nil
+	return nil, nil
 }
 
 func (y *Yard) Schedule(ctx context.Context, n int) ([]schedule.Candidate, error) {
