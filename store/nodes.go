@@ -44,9 +44,9 @@ func (db *DB) UpdateNode(ctx context.Context, job digest.Digest, n types.Node) e
 		}
 		art = string(b)
 	}
-	_, err := db.sql.ExecContext(ctx, `UPDATE nodes SET status=?, error=?, artifact_json=?, attempt=?
+	_, err := db.sql.ExecContext(ctx, `UPDATE nodes SET status=?, lease_by=?, lease_until=?, error=?, artifact_json=?, attempt=?
 		WHERE job_id=? AND node_id=?`,
-		string(n.Status), n.Error, art, n.Attempt, string(job), n.ID)
+		string(n.Status), n.LeaseBy, n.LeaseUntil, n.Error, art, n.Attempt, string(job), n.ID)
 	return err
 }
 
