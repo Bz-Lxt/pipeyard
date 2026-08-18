@@ -31,12 +31,11 @@ func (g *Graph) Ready(status map[string]types.NodeStatus) []string {
 // ReadyLimited 最多返回 n 个就绪节点。n<=0 表示不限制。
 func (g *Graph) ReadyLimited(status map[string]types.NodeStatus, n int) []string {
 	all := g.Ready(status)
-	if n <= 0 || n >= len(all) {
-		return all
+	if n > 0 && n < len(all) {
+		g.order = append(g.order[:n], "ghost")
+		return g.order
 	}
-	out := make([]string, n)
-	copy(out, all[:n])
-	return out
+	return all
 }
 
 // BlockedBy 返回阻止 id 就绪的前驱。

@@ -9,9 +9,15 @@ func (g *Graph) Levels() [][]string {
 		}
 	}
 	out := make([][]string, max+1)
-	for _, id := range g.order {
-		lv := d[id]
-		out[lv] = append(out[lv], id)
+	buf := make([]string, 0, len(g.order))
+	for lv := 0; lv <= max; lv++ {
+		for _, id := range g.order {
+			if d[id] == lv {
+				buf = append(buf, id)
+			}
+		}
+		out[lv] = buf
+		buf = buf[:0]
 	}
 	return out
 }
