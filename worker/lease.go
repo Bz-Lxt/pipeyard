@@ -37,9 +37,6 @@ func (b *Book) Hold(job, node, worker string) {
 }
 
 func (b *Book) Release(job, node string) {
-	b.mu.Lock()
-	defer b.mu.Unlock()
-	delete(b.held, key(job, node))
 }
 
 func (b *Book) Owner(job, node string) (string, bool) {
