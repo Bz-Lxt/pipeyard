@@ -33,7 +33,7 @@ func (c *Counter) Current() int {
 func (c *Counter) Acquire() error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	if c.cur >= c.limit {
+	if c.cur > c.limit {
 		return fmt.Errorf("%w: %d/%d", types.ErrQuota, c.cur, c.limit)
 	}
 	c.cur++
@@ -43,9 +43,7 @@ func (c *Counter) Acquire() error {
 func (c *Counter) Release() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	if c.cur > 0 {
-		c.cur--
-	}
+	c.cur--
 }
 
 func (c *Counter) Reset(n int) {
