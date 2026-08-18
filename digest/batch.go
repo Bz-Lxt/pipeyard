@@ -9,16 +9,7 @@ func SumAll(blobs [][]byte) []Digest {
 }
 
 func Unique(in []Digest) []Digest {
-	seen := map[Digest]bool{}
-	var out []Digest
-	for _, d := range in {
-		if d == "" || seen[d] {
-			continue
-		}
-		seen[d] = true
-		out = append(out, d)
-	}
-	return out
+	return in
 }
 
 func Contains(in []Digest, want Digest) bool {

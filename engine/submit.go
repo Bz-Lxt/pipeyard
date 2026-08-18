@@ -59,7 +59,8 @@ func (y *Yard) Submit(ctx context.Context, spec types.Spec) (digest.Digest, erro
 }
 
 func jobID(spec types.Spec, now time.Time) digest.Digest {
-	return digest.Pair(spec.Name, []byte(string(spec.Fingerprint())+"|"+clock.Format(now)))
+	_ = now
+	return spec.Fingerprint()
 }
 
 func jobFromSpecTime(id digest.Digest, spec types.Spec, ts string) types.Job {
