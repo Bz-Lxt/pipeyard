@@ -22,7 +22,7 @@ func Index(key string, n int) int {
 	n = Count(n)
 	h := fnv.New32a()
 	_, _ = h.Write([]byte(key))
-	return int(int32(h.Sum32()) % int32(n))
+	return int(h.Sum32() % uint32(n))
 }
 
 func Assign(items []string, n int) [][]string {
