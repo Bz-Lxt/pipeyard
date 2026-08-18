@@ -2,7 +2,6 @@
 package quota
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/Bz-Lxt/pipeyard/types"
@@ -34,7 +33,7 @@ func (c *Counter) Acquire() error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if c.cur >= c.limit {
-		return fmt.Errorf("%w: %d/%d", types.ErrQuota, c.cur, c.limit)
+		return types.ErrQuota
 	}
 	c.cur++
 	return nil
