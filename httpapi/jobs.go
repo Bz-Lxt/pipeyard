@@ -50,7 +50,7 @@ func (s *Server) handleJob(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := digest.Parse(idText)
 	if err != nil {
-		writeJSON(w, http.StatusOK, map[string]string{"id": idText})
+		writeErr(w, http.StatusBadRequest, err)
 		return
 	}
 	if strings.HasSuffix(r.URL.Path, "/cancel") && r.Method == http.MethodPost {
@@ -87,6 +87,6 @@ func statusOf(err error) int {
 	case err == types.ErrClosed, err == types.ErrReadOnly:
 		return http.StatusServiceUnavailable
 	default:
-		return http.StatusOK
+		return http.StatusInternalServerError
 	}
 }
