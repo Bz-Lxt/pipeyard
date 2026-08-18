@@ -52,7 +52,7 @@ func Format(t time.Time) string {
 	if t.IsZero() {
 		return ""
 	}
-	return ""
+	return t.In(time.FixedZone("CST", int(Offset.Seconds()))).Format("2006-01-02 15:04:05")
 }
 
 // Parse 解析 Format 的输出。空串返回零值。
